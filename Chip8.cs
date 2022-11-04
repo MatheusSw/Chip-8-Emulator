@@ -37,6 +37,11 @@ public class Chip8
         Stack = new Stack<int>();
     }
 
+    private Register? FindRegisterFromInstruction(int register)
+    {
+        return Registers.Find(r => r.Name == $"V{register:X}");
+    }
+
     public void Process(int instruction, Opcode opcode)
     {
         var operand = instruction ^ opcode.Instruction;
@@ -59,7 +64,7 @@ public class Chip8
             {
                 var register = operand >> 8;
                 var value = operand & 0xFF;
-                if (Registers.Find(r => r.Name == $"V{register:X}")!.Data == value)
+                if (FindRegisterFromInstruction(register)!.Data == value)
                 {
                     //Set skip
                 }
@@ -70,7 +75,7 @@ public class Chip8
             {
                 var register = operand >> 8;
                 var value = operand & 0xFF;
-                if (Registers.Find(r => r.Name == $"V{register:X}")!.Data != value)
+                if (FindRegisterFromInstruction(register)!.Data != value)
                 {
                     //Set skip
                 }
@@ -81,52 +86,60 @@ public class Chip8
             {
                 var register = operand >> 8;
                 var compRegister = operand >> 4 & 0xF;
-                if (Registers.Find(r => r.Name == $"V{register:X}")!.Data
-                    == Registers.Find(r => r.Name == $"V{compRegister:X}")!.Data)
+                if (FindRegisterFromInstruction(register)!.Data
+                    == FindRegisterFromInstruction(compRegister)!.Data)
                 {
                     //Set skip
                 }
+
                 break;
             }
             case 0x6000:
             {
                 var register = operand >> 8;
                 var value = operand & 0xFF;
-                Registers.Find(r => r.Name == $"V{register:X}")!.Data = value;
+                FindRegisterFromInstruction(register)!.Data = value;
                 break;
-            }            
+            }
             case 0x7000:
             {
                 var register = operand >> 8;
                 var value = operand & 0xFF;
-                Registers.Find(r => r.Name == $"V{register:X}")!.Data += value;
+                FindRegisterFromInstruction(register)!.Data += value;
                 break;
-            }            
-            case "8XY0": break;
-            case "8XY1": break;
-            case "8XY2": break;
-            case "8XY3": break;
-            case "8XY4": break;
-            case "8XY5": break;
-            case "8XY6": break;
-            case "8XY7": break;
-            case "8XYE": break;
-            case "9XY0": break;
-            case "ANNN": break;
-            case "BNNN": break;
-            case "CXNN": break;
-            case "DXYN": break;
-            case "EX9E": break;
-            case "EXA1": break;
-            case "FX07": break;
-            case "FX0A": break;
-            case "FX15": break;
-            case "FX18": break;
-            case "FX1E": break;
-            case "FX29": break;
-            case "FX33": break;
-            case "FX55": break;
-            case "FX65": break;
+            }
+            case 0x8000:
+            {
+                var originRegister = operand >> 8;
+                var destinationRegister = operand >> 4 & 0xF;
+                FindRegisterFromInstruction(originRegister)!.Data =
+                    FindRegisterFromInstruction(destinationRegister)!.Data;
+                break;
+            }
+            case 0x8001: break;
+            case 0x8002: break;
+            case 0x8003: break;
+            case 0x8004: break;
+            case 0x8005: break;
+            case 0x8006: break;
+            case 0x8007: break;
+            case 0x800E: break;
+            case 0x9000: break;
+            case 0xA000: break;
+            case 0xB000: break;
+            case 0xC000: break;
+            case 0xD000: break;
+            case 0xE09E: break;
+            case 0xE0A1: break;
+            case 0xF007: break;
+            case 0xF00A: break;
+            case 0xF015: break;
+            case 0xF018: break;
+            case 0xF01E: break;
+            case 0xF029: break;
+            case 0xF033: break;
+            case 0xF055: break;
+            case 0xF065: break;
         }
     }
 }
