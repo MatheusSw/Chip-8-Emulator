@@ -12,7 +12,8 @@ public class Chip8
     public int ProgramCounter = 0;
     public int DelayTimer = 0;
     public int SoundTimer = 0;
-
+    public bool SkipFlag = false;
+    
     public Chip8()
     {
         _registers = new List<Register>
@@ -66,7 +67,7 @@ public class Chip8
                 var value = operand & 0xFF;
                 if (FindRegisterFromInstruction(register)!.Data == value)
                 {
-                    //Set skip
+                    SkipFlag = true;
                 }
 
                 break;
@@ -77,7 +78,7 @@ public class Chip8
                 var value = operand & 0xFF;
                 if (FindRegisterFromInstruction(register)!.Data != value)
                 {
-                    //Set skip
+                    SkipFlag = true;
                 }
 
                 break;
@@ -89,7 +90,7 @@ public class Chip8
                 if (FindRegisterFromInstruction(register)!.Data
                     == FindRegisterFromInstruction(compRegister)!.Data)
                 {
-                    //Set skip
+                    SkipFlag = true;
                 }
 
                 break;
