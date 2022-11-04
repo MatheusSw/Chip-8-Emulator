@@ -4,18 +4,18 @@ namespace Chip8;
 
 public class Chip8
 {
-    public List<Register> Registers;
-    public Register AddressRegister = new() {Name = "Address"};
+    private readonly List<Register> _registers;
+    private readonly Register _addressRegister = new() {Name = "Address"};
 
-    public Stack<int> Stack;
+    private readonly Stack<int> _stack;
     public char[] Memory = new char[4096];
     public int ProgramCounter = 0;
-    public int DelayTimer = 0;
-    public int SoundTimer = 0;
+    public float DelayTimer = 0;
+    public float SoundTimer = 0;
 
     public Chip8()
     {
-        Registers = new List<Register>
+        _registers = new List<Register>
         {
             new() {Name = "VO"},
             new() {Name = "V1"},
@@ -34,12 +34,12 @@ public class Chip8
             new() {Name = "VE"},
             new() {Name = "VF"}
         };
-        Stack = new Stack<int>();
+        _stack = new Stack<int>();
     }
 
     private Register? FindRegisterFromInstruction(int register)
     {
-        return Registers.Find(r => r.Name == $"V{register:X}");
+        return _registers.Find(r => r.Name == $"V{register:X}");
     }
 
     public void Process(int instruction, Opcode opcode)
@@ -49,16 +49,16 @@ public class Chip8
         {
             case 0xE0: break;
             case 0xEE:
-                var returnAddress = Stack.Pop();
-                AddressRegister.Data = returnAddress;
+                var returnAddress = _stack.Pop();
+                _addressRegister.Data = returnAddress;
                 break;
             case 0x1000:
-                AddressRegister.Data = (opcode.Instruction << 4) >> 4;
+                _addressRegister.Data = (opcode.Instruction << 4) >> 4;
                 break;
             case 0x2000:
                 var subAddress = (opcode.Instruction << 4) >> 4;
-                Stack.Push(AddressRegister.Data);
-                AddressRegister.Data = subAddress;
+                _stack.Push(_addressRegister.Data);
+                _addressRegister.Data = subAddress;
                 break;
             case 0x3000:
             {
