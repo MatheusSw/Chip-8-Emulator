@@ -4,10 +4,10 @@ namespace Chip8;
 
 public class Chip8
 {
-    private readonly List<Register> _registers;
-    private readonly Register _addressRegister = new() {Name = "Address"};
+    public readonly List<Register> _registers;
+    public readonly Register _addressRegister = new() {Name = "Address"};
 
-    private readonly Stack<int> _stack;
+    public readonly Stack<int> _stack;
     public char[] Memory = new char[4096];
     public int ProgramCounter = 0;
     public int DelayTimer = 0;
@@ -56,7 +56,7 @@ public class Chip8
                 _addressRegister.Data = (opcode.Instruction << 4) >> 4;
                 break;
             case 0x2000:
-                var subAddress = (opcode.Instruction << 4) >> 4;
+                var subAddress = operand;
                 _stack.Push(_addressRegister.Data);
                 _addressRegister.Data = subAddress;
                 break;
