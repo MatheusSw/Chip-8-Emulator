@@ -10,8 +10,8 @@ public class Chip8
     private readonly Stack<int> _stack;
     public char[] Memory = new char[4096];
     public int ProgramCounter = 0;
-    public float DelayTimer = 0;
-    public float SoundTimer = 0;
+    public int DelayTimer = 0;
+    public int SoundTimer = 0;
 
     public Chip8()
     {
@@ -178,22 +178,97 @@ public class Chip8
                 
                 break;
             }
-            case 0x9000: break;
-            case 0xA000: break;
-            case 0xB000: break;
-            case 0xC000: break;
-            case 0xD000: break;
-            case 0xE09E: break;
+            case 0x9000:
+            {
+                var register = operand >> 8;
+                var compRegister = operand >> 4 & 0xF;
+                if (FindRegisterFromInstruction(register)!.Data
+                    != FindRegisterFromInstruction(compRegister)!.Data)
+                {
+                    //Set skip
+                }
+                break;
+            }
+            case 0xA000:
+            {
+                _addressRegister.Data = operand;
+                break;
+            }
+            case 0xB000:
+            {
+                _addressRegister.Data = operand + _registers.Find(r => r.Name == "V0")!.Data;
+                break;
+            }
+            case 0xC000:
+            {
+                var number = operand & 0xFF;
+                var register = operand >> 8;
+                FindRegisterFromInstruction(register)!.Data = new Random().Next(0, 256) & number;
+                break;
+            }
+            case 0xD000:
+            {
+                //Display
+                break;
+            }
+            case 0xE09E:
+            {
+                
+                break;
+            }
             case 0xE0A1: break;
-            case 0xF007: break;
-            case 0xF00A: break;
-            case 0xF015: break;
-            case 0xF018: break;
-            case 0xF01E: break;
-            case 0xF029: break;
+            case 0xF007:
+            {
+                var register = operand >> 8;
+                FindRegisterFromInstruction(register)!.Data = DelayTimer;
+                break;
+            }
+            case 0xF00A:
+            {
+                break;
+            }
+            case 0xF015:
+            {
+                var register = operand >> 8;
+                DelayTimer = FindRegisterFromInstruction(register)!.Data;
+                break;
+            }
+            case 0xF018:
+            {
+                var register = operand >> 8;
+                SoundTimer = FindRegisterFromInstruction(register)!.Data;
+                break;
+            }
+            case 0xF01E:
+            {
+                var register = operand >> 8;
+                _addressRegister.Data += FindRegisterFromInstruction(register)!.Data;
+                break;
+            }
+            case 0xF029:
+            {
+                //Sprite
+                break;
+            }
             case 0xF033: break;
-            case 0xF055: break;
-            case 0xF065: break;
+            case 0xF055:
+            {
+                var registerLimit = operand >> 8;
+                for (var i = 0; i <= registerLimit; i++)
+                {
+                    Memory[_addressRegister.Data + i] = (char)FindRegisterFromInstruction(i)!.Data;
+                }
+                break;
+            }
+            case 0xF065:
+            {
+                var registerLimit = operand >> 8;
+                for (var i = 0; i <= registerLimit; i++)
+                {
+                    FindRegisterFromInstruction(i)!.Data = Memory[_addressRegister.Data + i];
+                }
+                break;
+            }
         }
     }
 }
