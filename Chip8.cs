@@ -116,14 +116,68 @@ public class Chip8
                     FindRegisterFromInstruction(destinationRegister)!.Data;
                 break;
             }
-            case 0x8001: break;
-            case 0x8002: break;
-            case 0x8003: break;
-            case 0x8004: break;
-            case 0x8005: break;
-            case 0x8006: break;
-            case 0x8007: break;
-            case 0x800E: break;
+            case 0x8001:
+            {
+                var originRegister = operand >> 8;
+                var destinationRegister = operand >> 4 & 0xF;
+                FindRegisterFromInstruction(originRegister)!.Data |=
+                    FindRegisterFromInstruction(destinationRegister)!.Data;
+                break;
+            }            
+            case 0x8002:
+            {
+                var originRegister = operand >> 8;
+                var destinationRegister = operand >> 4 & 0xF;
+                FindRegisterFromInstruction(originRegister)!.Data &=
+                    FindRegisterFromInstruction(destinationRegister)!.Data;
+                break;
+            }
+            case 0x8003:
+            {
+                var originRegister = operand >> 8;
+                var destinationRegister = operand >> 4 & 0xF;
+                FindRegisterFromInstruction(originRegister)!.Data ^=
+                    FindRegisterFromInstruction(destinationRegister)!.Data;
+                break;
+            }
+            case 0x8004:
+            {
+                var originRegister = operand >> 8;
+                var destinationRegister = operand >> 4 & 0xF;
+                //HANDLE CARRY FLAG
+                FindRegisterFromInstruction(originRegister)!.Data +=
+                    FindRegisterFromInstruction(destinationRegister)!.Data;
+                break;
+            }
+            case 0x8005:
+            {
+                var originRegister = operand >> 8;
+                var destinationRegister = operand >> 4 & 0xF;
+                //HANDLE BORROW FLAG
+                FindRegisterFromInstruction(originRegister)!.Data -=
+                    FindRegisterFromInstruction(destinationRegister)!.Data;
+                break;
+            }
+            case 0x8006:
+            {
+                break;
+            }
+            case 0x8007:
+            {
+                var originRegister = operand >> 8;
+                var destinationRegister = operand >> 4 & 0xF;
+                var reg1 = FindRegisterFromInstruction(originRegister)!;
+                
+                //HANDLE BORROW FLAG
+                 reg1.Data =
+                    FindRegisterFromInstruction(destinationRegister)!.Data - reg1.Data;
+                break;
+            }
+            case 0x800E:
+            {
+                
+                break;
+            }
             case 0x9000: break;
             case 0xA000: break;
             case 0xB000: break;
