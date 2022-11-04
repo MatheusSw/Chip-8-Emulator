@@ -250,7 +250,16 @@ public class Chip8
                 //Sprite
                 break;
             }
-            case 0xF033: break;
+            case 0xF033:
+            {
+                var register = operand >> 8;
+
+                Memory[ _addressRegister.Data ] = (char)(FindRegisterFromInstruction(register)!.Data / 100);
+                Memory[ _addressRegister.Data + 1 ] = (char) (FindRegisterFromInstruction(register)!.Data / 10 % 10);
+                Memory[ _addressRegister.Data + 2 ] = (char) (FindRegisterFromInstruction(register)!.Data % 100 % 10);
+                //Thanks JamesGriffin
+                break;
+            }
             case 0xF055:
             {
                 var registerLimit = operand >> 8;
