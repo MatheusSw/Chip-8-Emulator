@@ -1,4 +1,5 @@
-﻿using Chip8.Models;
+﻿using System.Linq;
+using Chip8.Models;
 using Xunit;
 
 namespace Chip8.Tests;
@@ -13,12 +14,12 @@ public class ProcessorTests
         var subroutineAddress = 0x1;
 
         //Act
-        chip8._stack.Push(subroutineAddress);
+        chip8.Stack.Push(subroutineAddress);
         chip8.Process(0xEE, new Opcode {Instruction = 0x00EE});
 
         //Assert
-        Assert.True(chip8._stack.Count == 0);
-        Assert.True(chip8._addressRegister.Data == subroutineAddress);
+        Assert.True(chip8.Stack.Count == 0);
+        Assert.True(chip8.AddressRegister.Data == subroutineAddress);
     }
 
     [Fact]
@@ -32,7 +33,7 @@ public class ProcessorTests
         chip8.Process(0x1000, new Opcode {Instruction = instruction});
 
         //Assert
-        Assert.True(chip8._addressRegister.Data == instruction);
+        Assert.True(chip8.AddressRegister.Data == instruction);
     }
     
     [Fact]
@@ -42,14 +43,14 @@ public class ProcessorTests
         var chip8 = new Chip8();
         const int instruction = 0x2123;
         const int stackAddress = 0x3;
-        chip8._addressRegister.Data = stackAddress;
+        chip8.AddressRegister.Data = stackAddress;
         
         //Act
         chip8.Process(0x2000, new Opcode {Instruction = instruction});
 
         //Assert
-        Assert.True(chip8._addressRegister.Data == (instruction & 0xFFF));
-        Assert.True(chip8._stack.Peek() == stackAddress);
+        Assert.True(chip8.AddressRegister.Data == (instruction & 0xFFF));
+        Assert.True(chip8.Stack.Peek() == stackAddress);
     }
     
     [Fact]
@@ -59,7 +60,7 @@ public class ProcessorTests
         var chip8 = new Chip8();
         const int instruction = 0x3120;
         const int nnValue = 0x20;
-        var register = chip8._registers.First(r => r.Name == "V1");
+        var register = chip8.Registers.First(r => r.Name == "V1");
         register.Data = nnValue;
         
         //Act
@@ -89,8 +90,8 @@ public class ProcessorTests
         //Arrange
         var chip8 = new Chip8();
         const int instruction = 0x5120;
-        chip8._registers.First(r => r.Name == "V1").Data = 0x20;
-        chip8._registers.First(r => r.Name == "V2").Data = 0x20;
+        chip8.Registers.First(r => r.Name == "V1").Data = 0x20;
+        chip8.Registers.First(r => r.Name == "V2").Data = 0x20;
         
         //Act
         chip8.Process(0x5000, new Opcode {Instruction = instruction});
@@ -110,7 +111,7 @@ public class ProcessorTests
         chip8.Process(0x6000, new Opcode {Instruction = instruction});
         
         //Assert
-        Assert.Equal(0x20, chip8._registers.First(r => r.Name == "V1").Data);
+        Assert.Equal(0x20, chip8.Registers.First(r => r.Name == "V1").Data);
     }
     
     [Fact]
@@ -118,14 +119,14 @@ public class ProcessorTests
     {
         //Arrange
         var chip8 = new Chip8();
-        chip8._registers.First(r => r.Name == "V1").Data = 0x20;
+        chip8.Registers.First(r => r.Name == "V1").Data = 0x20;
         const int instruction = 0x7120;
         
         //Act
         chip8.Process(0x7000, new Opcode {Instruction = instruction});
         
         //Assert
-        Assert.Equal(0x40, chip8._registers.First(r => r.Name == "V1").Data);
+        Assert.Equal(0x40, chip8.Registers.First(r => r.Name == "V1").Data);
     }
 
     [Fact]
@@ -133,15 +134,15 @@ public class ProcessorTests
     {
         //Arrange
         var chip8 = new Chip8();
-        chip8._registers.First(r => r.Name == "V1").Data = 0x20;
-        chip8._registers.First(r => r.Name == "V2").Data = 0x80;
+        chip8.Registers.First(r => r.Name == "V1").Data = 0x20;
+        chip8.Registers.First(r => r.Name == "V2").Data = 0x80;
         const int instruction = 0x8120;
         
         //Act
         chip8.Process(0x8000, new Opcode {Instruction = instruction});
         
         //Assert
-        Assert.Equal(chip8._registers.First(r => r.Name == "V2").Data, chip8._registers.First(r => r.Name == "V1").Data);
+        Assert.Equal(chip8.Registers.First(r => r.Name == "V2").Data, chip8.Registers.First(r => r.Name == "V1").Data);
     }
     
     [Fact]
@@ -149,8 +150,8 @@ public class ProcessorTests
     {
         //Arrange
         var chip8 = new Chip8();
-        var reg1 = chip8._registers.First(r => r.Name == "V1");
-        var reg2 = chip8._registers.First(r => r.Name == "V2");
+        var reg1 = chip8.Registers.First(r => r.Name == "V1");
+        var reg2 = chip8.Registers.First(r => r.Name == "V2");
         reg1.Data = 0x20;
         reg2.Data = 0x80;
         const int instruction = 0x8121;
@@ -167,10 +168,10 @@ public class ProcessorTests
     {
         //Arrange
         var chip8 = new Chip8();
-        var reg1 = chip8._registers.First(r => r.Name == "V1");
+        var reg1 = chip8.Registers.First(r => r.Name == "V1");
         reg1.Data = 0x20;
         
-        var reg2 = chip8._registers.First(r => r.Name == "V2");
+        var reg2 = chip8.Registers.First(r => r.Name == "V2");
         reg2.Data = 0x80;
         
         const int instruction = 0x8122;
@@ -187,10 +188,10 @@ public class ProcessorTests
     {
         //Arrange
         var chip8 = new Chip8();
-        var reg1 = chip8._registers.First(r => r.Name == "V1");
+        var reg1 = chip8.Registers.First(r => r.Name == "V1");
         reg1.Data = 0x20;
         
-        var reg2 = chip8._registers.First(r => r.Name == "V2");
+        var reg2 = chip8.Registers.First(r => r.Name == "V2");
         reg2.Data = 0x80;
         
         const int instruction = 0x8123;
@@ -207,18 +208,39 @@ public class ProcessorTests
     {
         //Arrange
         var chip8 = new Chip8();
-        var reg1 = chip8._registers.First(r => r.Name == "V1");
+        var reg1 = chip8.Registers.First(r => r.Name == "V1");
         reg1.Data = 0x20;
         
-        var reg2 = chip8._registers.First(r => r.Name == "V2");
+        var reg2 = chip8.Registers.First(r => r.Name == "V2");
         reg2.Data = 0x80;
         
-        const int instruction = 0x8123;
+        const int instruction = 0x8124;
         
         //Act
-        chip8.Process(0x8003, new Opcode {Instruction = instruction});
+        chip8.Process(0x8004, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.Equal(0x20 ^ 0x80, reg1.Data);
+    }
+    
+    [Fact]
+    public void Test_8XY5_Should_SubstractVyFromVx()
+    {
+        //Arrange
+        var chip8 = new Chip8();
+        var reg1 = chip8.Registers.First(r => r.Name == "V1");
+        reg1.Data = 0x20;
+        
+        var reg2 = chip8.Registers.First(r => r.Name == "V2");
+        reg2.Data = 0x80;
+        
+        const int instruction = 0x8125;
+        
+        //Act
+        chip8.Process(0x8005, new Opcode {Instruction = instruction});
+        
+        //Assert
+        Assert.True(chip8.Registers.First(r => r.Name == "VF").Data > 0);
+        Assert.Equal(0x20 - 0x80, reg1.Data);
     }
 }
