@@ -20,25 +20,7 @@ public class Chip8
 
     public Chip8()
     {
-        Registers = new List<Register>
-        {
-            new() {Name = "VO"},
-            new() {Name = "V1"},
-            new() {Name = "V2"},
-            new() {Name = "V3"},
-            new() {Name = "V4"},
-            new() {Name = "V5"},
-            new() {Name = "V6"},
-            new() {Name = "V7"},
-            new() {Name = "V8"},
-            new() {Name = "V9"},
-            new() {Name = "VA"},
-            new() {Name = "VB"},
-            new() {Name = "VC"},
-            new() {Name = "VD"},
-            new() {Name = "VE"},
-            new() {Name = "VF"}
-        };
+        Registers = Enumerable.Range(0, 16).Select(index => new Register {Name = $"V{index:X}"}).ToList();
         Stack = new Stack<int>();
         ProgramCounter = RomMemoryStart;
     }
@@ -57,8 +39,6 @@ public class Chip8
         }
 
         var instruction = NextInstruction();
-
-        ProgramCounter += 2;
 
         ProcessInstruction(new Instruction(instruction));
     }
@@ -237,6 +217,7 @@ public class Chip8
             }
             case 0xB000:
             {
+                //Always V0
                 AddressRegister.Data = instruction.Operand.LongConstant + Registers.Find(r => r.Name == "V0")!.Data;
                 break;
             }
