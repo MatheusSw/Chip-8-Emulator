@@ -4,13 +4,13 @@ namespace Chip8;
 
 public class Chip8
 {
-    public int RomMemoryStart = 512;
+    public readonly int RomMemoryStart = 512;
 
     public readonly List<Register> Registers;
     public readonly Register AddressRegister = new() {Name = "Address"};
 
     public readonly Stack<int> Stack;
-    public char[] Memory = new char[4096];
+    public readonly char[] Memory = new char[4096];
 
     public int ProgramCounter = 0;
 
@@ -59,8 +59,8 @@ public class Chip8
         var instruction = NextInstruction();
 
         ProgramCounter += 2;
-        
-        ProcessInstruction(instruction, new Opcode {Instruction = instruction});
+
+        ProcessInstruction(new Instruction {Operand = instruction});
     }
 
     private Register FindRegisterFromInstruction(int register)
@@ -68,10 +68,9 @@ public class Chip8
         return Registers.First(r => r.Name == $"V{register:X}");
     }
 
-    public void ProcessInstruction(int instruction, Opcode opcode)
+    public void ProcessInstruction(Instruction instruction)
     {
-        var operand = instruction ^ opcode.Instruction;
-        switch (instruction)
+        switch (instruction.Opcode)
         {
             case 0xE0: break;
             case 0xEE:
@@ -79,17 +78,17 @@ public class Chip8
                 AddressRegister.Data = returnAddress;
                 break;
             case 0x1000:
-                AddressRegister.Data = opcode.Instruction & 0xFFF;
+                AddressRegister.Data = instruction.Address;
                 break;
             case 0x2000:
-                var subAddress = operand;
+                var subAddress = instruction.Address;
                 Stack.Push(AddressRegister.Data);
                 AddressRegister.Data = subAddress;
                 break;
             case 0x3000:
             {
-                var register = operand >> 8;
-                var value = operand & 0xFF;
+                var register = instruction.FirstRegister;
+                var value = instruction.LongConstant;
                 if (FindRegisterFromInstruction(register).Data == value)
                 {
                     SkipFlag = true;
@@ -99,8 +98,8 @@ public class Chip8
             }
             case 0x4000:
             {
-                var register = operand >> 8;
-                var value = operand & 0xFF;
+                var register = instruction.FirstRegister;
+                var value = instruction.LongConstant;
                 if (FindRegisterFromInstruction(register).Data != value)
                 {
                     SkipFlag = true;
@@ -110,8 +109,8 @@ public class Chip8
             }
             case 0x5000:
             {
-                var register = operand >> 8;
-                var compRegister = operand >> 4 & 0xF;
+                var register = instruction.FirstRegister;
+                var compRegister = instruction.SecondRegister;
                 if (FindRegisterFromInstruction(register).Data
                     == FindRegisterFromInstruction(compRegister).Data)
                 {
@@ -122,54 +121,54 @@ public class Chip8
             }
             case 0x6000:
             {
-                var register = operand >> 8;
-                var value = operand & 0xFF;
+                var register = instruction.FirstRegister;
+                var value = instruction.LongConstant;
                 FindRegisterFromInstruction(register).Data = value;
                 break;
             }
             case 0x7000:
             {
-                var register = operand >> 8;
-                var value = operand & 0xFF;
+                var register = instruction.FirstRegister;
+                var value = instruction.LongConstant;
                 FindRegisterFromInstruction(register).Data += value;
                 break;
             }
             case 0x8000:
             {
-                var originRegister = operand >> 8;
-                var destinationRegister = operand >> 4 & 0xF;
+                var originRegister = instruction.FirstRegister;
+                var destinationRegister = instruction.SecondRegister;
                 FindRegisterFromInstruction(originRegister).Data =
                     FindRegisterFromInstruction(destinationRegister).Data;
                 break;
             }
             case 0x8001:
             {
-                var originRegister = operand >> 8;
-                var destinationRegister = operand >> 4 & 0xF;
+                var originRegister = instruction.FirstRegister;
+                var destinationRegister = instruction.SecondRegister;
                 FindRegisterFromInstruction(originRegister).Data |=
                     FindRegisterFromInstruction(destinationRegister).Data;
                 break;
             }
             case 0x8002:
             {
-                var originRegister = operand >> 8;
-                var destinationRegister = operand >> 4 & 0xF;
+                var originRegister = instruction.FirstRegister;
+                var destinationRegister = instruction.SecondRegister;
                 FindRegisterFromInstruction(originRegister).Data &=
                     FindRegisterFromInstruction(destinationRegister).Data;
                 break;
             }
             case 0x8003:
             {
-                var originRegister = operand >> 8;
-                var destinationRegister = operand >> 4 & 0xF;
+                var originRegister = instruction.FirstRegister;
+                var destinationRegister = instruction.SecondRegister;
                 FindRegisterFromInstruction(originRegister).Data ^=
                     FindRegisterFromInstruction(destinationRegister).Data;
                 break;
             }
             case 0x8004:
             {
-                var originRegister = operand >> 8;
-                var destinationRegister = operand >> 4 & 0xF;
+                var originRegister = instruction.FirstRegister;
+                var destinationRegister = instruction.SecondRegister;
 
                 var vfRegister = Registers.First(r => r.Name == "VF");
                 vfRegister.Data = FindRegisterFromInstruction(originRegister).Data +
@@ -183,8 +182,8 @@ public class Chip8
             }
             case 0x8005:
             {
-                var originRegister = operand >> 8;
-                var destinationRegister = operand >> 4 & 0xF;
+                var originRegister = instruction.FirstRegister;
+                var destinationRegister = instruction.SecondRegister;
 
                 var vfRegister = Registers.First(r => r.Name == "VF");
                 vfRegister.Data = FindRegisterFromInstruction(originRegister).Data <
@@ -202,8 +201,8 @@ public class Chip8
             }
             case 0x8007:
             {
-                var originRegister = operand >> 8;
-                var destinationRegister = operand >> 4 & 0xF;
+                var originRegister = instruction.FirstRegister;
+                var destinationRegister = instruction.SecondRegister;
                 var reg1 = FindRegisterFromInstruction(originRegister);
 
                 var vfRegister = Registers.First(r => r.Name == "VF");
@@ -221,8 +220,8 @@ public class Chip8
             }
             case 0x9000:
             {
-                var register = operand >> 8;
-                var compRegister = operand >> 4 & 0xF;
+                var register = instruction.FirstRegister;
+                var compRegister = instruction.SecondRegister;
                 if (FindRegisterFromInstruction(register).Data
                     != FindRegisterFromInstruction(compRegister).Data)
                 {
@@ -233,18 +232,18 @@ public class Chip8
             }
             case 0xA000:
             {
-                AddressRegister.Data = operand;
+                AddressRegister.Data = instruction.LongConstant;
                 break;
             }
             case 0xB000:
             {
-                AddressRegister.Data = operand + Registers.Find(r => r.Name == "V0")!.Data;
+                AddressRegister.Data = instruction.LongConstant + Registers.Find(r => r.Name == "V0")!.Data;
                 break;
             }
             case 0xC000:
             {
-                var number = operand & 0xFF;
-                var register = operand >> 8;
+                var number = instruction.ShortConstant;
+                var register = instruction.FirstRegister;
                 FindRegisterFromInstruction(register).Data = new Random().Next(0, 256) & number;
                 break;
             }
@@ -260,7 +259,7 @@ public class Chip8
             case 0xE0A1: break;
             case 0xF007:
             {
-                var register = operand >> 8;
+                var register = instruction.FirstRegister;
                 FindRegisterFromInstruction(register).Data = DelayTimer;
                 break;
             }
@@ -270,19 +269,19 @@ public class Chip8
             }
             case 0xF015:
             {
-                var register = operand >> 8;
+                var register = instruction.FirstRegister;
                 DelayTimer = FindRegisterFromInstruction(register).Data;
                 break;
             }
             case 0xF018:
             {
-                var register = operand >> 8;
+                var register = instruction.FirstRegister;
                 SoundTimer = FindRegisterFromInstruction(register).Data;
                 break;
             }
             case 0xF01E:
             {
-                var register = operand >> 8;
+                var register = instruction.FirstRegister;
                 AddressRegister.Data += FindRegisterFromInstruction(register).Data;
                 break;
             }
@@ -293,7 +292,7 @@ public class Chip8
             }
             case 0xF033:
             {
-                var register = operand >> 8;
+                var register = instruction.FirstRegister;
 
                 Memory[AddressRegister.Data] = (char) (FindRegisterFromInstruction(register).Data / 100);
                 Memory[AddressRegister.Data + 1] = (char) (FindRegisterFromInstruction(register).Data / 10 % 10);
@@ -303,7 +302,7 @@ public class Chip8
             }
             case 0xF055:
             {
-                var registerLimit = operand >> 8;
+                var registerLimit = instruction.FirstRegister;
                 for (var i = 0; i <= registerLimit; i++)
                 {
                     Memory[AddressRegister.Data + i] = (char) FindRegisterFromInstruction(i).Data;
@@ -313,7 +312,7 @@ public class Chip8
             }
             case 0xF065:
             {
-                var registerLimit = operand >> 8;
+                var registerLimit = instruction.FirstRegister;
                 for (var i = 0; i <= registerLimit; i++)
                 {
                     FindRegisterFromInstruction(i).Data = Memory[AddressRegister.Data + i];

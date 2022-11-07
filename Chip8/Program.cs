@@ -1,5 +1,5 @@
 ﻿Console.WriteLine("Please type the rom path");
-var romPath = Console.ReadLine();
+var romPath = "pong";/**/
 
 if (!File.Exists(romPath))
 {
