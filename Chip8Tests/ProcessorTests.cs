@@ -15,7 +15,7 @@ public class ProcessorTests
 
         //Act
         chip8.Stack.Push(subroutineAddress);
-        chip8.Process(0xEE, new Opcode {Instruction = 0x00EE});
+        chip8.ProcessInstruction(0xEE, new Opcode {Instruction = 0x00EE});
 
         //Assert
         Assert.True(chip8.Stack.Count == 0);
@@ -30,10 +30,10 @@ public class ProcessorTests
         var instruction = 0x1123;
 
         //Act
-        chip8.Process(0x1000, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x1000, new Opcode {Instruction = instruction});
 
         //Assert
-        Assert.True(chip8.AddressRegister.Data == instruction);
+        Assert.True(chip8.AddressRegister.Data == (instruction & 0xFFF));
     }
     
     [Fact]
@@ -46,7 +46,7 @@ public class ProcessorTests
         chip8.AddressRegister.Data = stackAddress;
         
         //Act
-        chip8.Process(0x2000, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x2000, new Opcode {Instruction = instruction});
 
         //Assert
         Assert.True(chip8.AddressRegister.Data == (instruction & 0xFFF));
@@ -64,7 +64,7 @@ public class ProcessorTests
         register.Data = nnValue;
         
         //Act
-        chip8.Process(0x3000, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x3000, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.True(chip8.SkipFlag);
@@ -78,7 +78,7 @@ public class ProcessorTests
         const int instruction = 0x4120;
 
         //Act
-        chip8.Process(0x4000, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x4000, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.True(chip8.SkipFlag);
@@ -94,7 +94,7 @@ public class ProcessorTests
         chip8.Registers.First(r => r.Name == "V2").Data = 0x20;
         
         //Act
-        chip8.Process(0x5000, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x5000, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.True(chip8.SkipFlag);
@@ -108,7 +108,7 @@ public class ProcessorTests
         const int instruction = 0x6120;
         
         //Act
-        chip8.Process(0x6000, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x6000, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.Equal(0x20, chip8.Registers.First(r => r.Name == "V1").Data);
@@ -123,7 +123,7 @@ public class ProcessorTests
         const int instruction = 0x7120;
         
         //Act
-        chip8.Process(0x7000, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x7000, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.Equal(0x40, chip8.Registers.First(r => r.Name == "V1").Data);
@@ -139,7 +139,7 @@ public class ProcessorTests
         const int instruction = 0x8120;
         
         //Act
-        chip8.Process(0x8000, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x8000, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.Equal(chip8.Registers.First(r => r.Name == "V2").Data, chip8.Registers.First(r => r.Name == "V1").Data);
@@ -157,7 +157,7 @@ public class ProcessorTests
         const int instruction = 0x8121;
         
         //Act
-        chip8.Process(0x8001, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x8001, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.Equal(reg1.Data | reg2.Data, reg1.Data);
@@ -177,7 +177,7 @@ public class ProcessorTests
         const int instruction = 0x8122;
         
         //Act
-        chip8.Process(0x8002, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x8002, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.Equal(reg1.Data & reg2.Data, reg1.Data);
@@ -197,7 +197,7 @@ public class ProcessorTests
         const int instruction = 0x8123;
         
         //Act
-        chip8.Process(0x8003, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x8003, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.Equal(0x20 ^ 0x80, reg1.Data);
@@ -217,7 +217,7 @@ public class ProcessorTests
         const int instruction = 0x8124;
         
         //Act
-        chip8.Process(0x8004, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x8004, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.Equal(0x20 ^ 0x80, reg1.Data);
@@ -237,7 +237,7 @@ public class ProcessorTests
         const int instruction = 0x8125;
         
         //Act
-        chip8.Process(0x8005, new Opcode {Instruction = instruction});
+        chip8.ProcessInstruction(0x8005, new Opcode {Instruction = instruction});
         
         //Assert
         Assert.True(chip8.Registers.First(r => r.Name == "VF").Data > 0);

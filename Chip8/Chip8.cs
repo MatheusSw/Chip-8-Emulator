@@ -4,14 +4,16 @@ namespace Chip8;
 
 public class Chip8
 {
+    public int RomMemoryStart = 512;
+
     public readonly List<Register> Registers;
     public readonly Register AddressRegister = new() {Name = "Address"};
 
     public readonly Stack<int> Stack;
     public char[] Memory = new char[4096];
-    
+
     public int ProgramCounter = 0;
-    
+
     public int DelayTimer = 0;
     public int SoundTimer = 0;
     public bool SkipFlag = false;
@@ -38,6 +40,27 @@ public class Chip8
             new() {Name = "VF"}
         };
         Stack = new Stack<int>();
+        ProgramCounter = RomMemoryStart;
+    }
+
+    private ushort NextInstruction()
+    {
+        return (ushort) (Memory[ProgramCounter++] << 8 | Memory[ProgramCounter++]);
+    }
+
+    public void Tick()
+    {
+        if (SkipFlag)
+        {
+            ProgramCounter += 2;
+            SkipFlag = false;
+        }
+
+        var instruction = NextInstruction();
+
+        ProgramCounter += 2;
+        
+        ProcessInstruction(instruction, new Opcode {Instruction = instruction});
     }
 
     private Register FindRegisterFromInstruction(int register)
@@ -45,7 +68,7 @@ public class Chip8
         return Registers.First(r => r.Name == $"V{register:X}");
     }
 
-    public void Process(int instruction, Opcode opcode)
+    public void ProcessInstruction(int instruction, Opcode opcode)
     {
         var operand = instruction ^ opcode.Instruction;
         switch (instruction)
@@ -56,7 +79,7 @@ public class Chip8
                 AddressRegister.Data = returnAddress;
                 break;
             case 0x1000:
-                AddressRegister.Data = (opcode.Instruction << 4) >> 4;
+                AddressRegister.Data = opcode.Instruction & 0xFFF;
                 break;
             case 0x2000:
                 var subAddress = operand;
