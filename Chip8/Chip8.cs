@@ -177,6 +177,9 @@ public class Chip8
             }
             case 0x8006:
             {
+                var firstRegister = FindRegisterFromInstruction(instruction.Operand.FirstRegister);
+                Registers.First(r => r.Name == "VF").Data = (byte)((firstRegister.Data & 0x1) != 0 ? 1 : 0);
+                firstRegister.Data /= 2;
                 break;
             }
             case 0x8007:
@@ -196,6 +199,9 @@ public class Chip8
             }
             case 0x800E:
             {
+                var firstRegister = FindRegisterFromInstruction(instruction.Operand.FirstRegister);
+                Registers.First(r => r.Name == "VF").Data = (byte)((firstRegister.Data & 0xF) != 0 ? 1 : 0); // Set flag if we shifted a 1 off the end.
+                firstRegister.Data *= 2; // Shift left.
                 break;
             }
             case 0x9000:
